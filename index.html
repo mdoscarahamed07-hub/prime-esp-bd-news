@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRIME ESP BD NEWS</title>
+  <meta name="description" content="PRIME ESP BD NEWS - Free Fire Esports News, Tournaments, Teams and Match Results.">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:Arial,Helvetica,sans-serif;
+      background:#07090d;
+      color:#fff;
+      line-height:1.5;
+    }
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    a{text-decoration:none;color:inherit}
+
+    header{
+      position:sticky;
+      top:0;
+      z-index:50;
+      background:rgba(7,9,13,.96);
+      border-bottom:1px solid #242936;
+      backdrop-filter:blur(10px);
+    }
+    .nav{
+      max-width:1150px;
+      margin:auto;
+      padding:15px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+    }
+    .logo{
+      font-size:21px;
+      font-weight:900;
+      letter-spacing:.5px;
+    }
+    .logo span{color:#ff3b30}
+    .admin-open{
+      background:#ff3b30;
+      color:white;
+      border:0;
+      padding:10px 14px;
+      border-radius:9px;
+      font-weight:800;
+    }
+
+    .hero{
+      max-width:1150px;
+      margin:20px auto 0;
+      padding:0 18px;
+    }
+    .hero-box{
+      min-height:220px;
+      border:1px solid #2b303c;
+      border-radius:18px;
+      padding:28px 22px;
+      display:flex;
+      align-items:center;
+      background:
+        radial-gradient(circle at 85% 20%,rgba(255,59,48,.25),transparent 35%),
+        linear-gradient(135deg,#11151d,#090b10);
+    }
+    .hero h1{font-size:clamp(30px,7vw,58px);line-height:1.05}
+    .hero h1 span{color:#ff3b30}
+    .hero p{margin-top:12px;color:#b9bec9;max-width:650px}
+
+    .breaking{
+      max-width:1150px;
+      margin:15px auto 0;
+      padding:0 18px;
+    }
+    .breaking-box{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      background:#12161e;
+      border:1px solid #292f3b;
+      border-radius:10px;
+      padding:10px 12px;
+      overflow:hidden;
+    }
+    .breaking-label{
+      flex:0 0 auto;
+      background:#ff3b30;
+      padding:5px 8px;
+      border-radius:6px;
+      font-size:12px;
+      font-weight:900;
+    }
+    #breakingText{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#ddd}
+
+    main{max-width:1150px;margin:22px auto;padding:0 18px}
+    .toolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:20px;
+    }
+    .search{
+      flex:1 1 220px;
+      min-width:190px;
+      background:#11151d;
+      border:1px solid #2b303c;
+      color:white;
+      padding:12px 14px;
+      border-radius:9px;
+      outline:none;
+    }
+    .search:focus{border-color:#ff3b30}
+    .cat{
+      border:1px solid #2b303c;
+      background:#11151d;
+      color:#ddd;
+      padding:10px 13px;
+      border-radius:8px;
+    }
+    .cat.active,.cat:hover{background:#ff3b30;color:#fff;border-color:#ff3b30}
+
+    .section-title{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin:12px 0;
+    }
+    .section-title h2{font-size:22px}
+    .count{color:#8e96a5;font-size:13px}
+
+    #newsGrid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+    }
+    .card{
+      background:#11151d;
+      border:1px solid #292f3b;
+      border-radius:13px;
+      overflow:hidden;
+      transition:.2s;
+    }
+    .card:hover{transform:translateY(-2px);border-color:#ff3b30}
+    .thumb{
+      width:100%;
+      height:180px;
+      object-fit:cover;
+      display:block;
+      background:#1a1e27;
+    }
+    .card-body{padding:15px}
+    .tag{
+      display:inline-block;
+      font-size:11px;
+      font-weight:800;
+      color:#ff665d;
+      margin-bottom:7px;
+      text-transform:uppercase;
+    }
+    .card h3{font-size:18px;line-height:1.25;margin-bottom:7px}
+    .date{font-size:12px;color:#7f8796;margin-bottom:10px}
+    .excerpt{font-size:13px;color:#b9bec9}
+    .read{
+      margin-top:12px;
+      border:0;
+      background:#202631;
+      color:white;
+      padding:9px 11px;
+      border-radius:7px;
+      font-weight:700;
+    }
+    .read:hover{background:#ff3b30}
+
+    .empty{
+      grid-column:1/-1;
+      text-align:center;
+      padding:50px 15px;
+      border:1px dashed #303744;
+      border-radius:12px;
+      color:#8f97a5;
+    }
+
+    footer{
+      margin-top:45px;
+      border-top:1px solid #242936;
+      padding:25px 18px;
+      text-align:center;
+      color:#7f8796;
+      font-size:13px;
+    }
+
+    .modal{
+      display:none;
+      position:fixed;
+      inset:0;
+      z-index:100;
+      background:rgba(0,0,0,.78);
+      padding:18px;
+      overflow:auto;
+    }
+    .modal.show{display:flex;align-items:flex-start;justify-content:center}
+    .modal-box{
+      width:min(760px,100%);
+      margin:25px auto;
+      background:#10141b;
+      border:1px solid #303744;
+      border-radius:14px;
+      padding:20px;
+      position:relative;
+    }
+    .close{
+      position:absolute;
+      right:13px;
+      top:10px;
+      border:0;
+      background:transparent;
+      color:#aaa;
+      font-size:28px;
+    }
+    .article-img{
+      width:100%;
+      max-height:420px;
+      object-fit:cover;
+      border-radius:10px;
+      margin:12px 0 15px;
+    }
+    .article-text{white-space:pre-wrap;color:#d7dbe3}
+
+    #adminModal .modal-box{max-width:850px}
+    .admin-status{
+      padding:10px 12px;
+      background:#171c25;
+      border-radius:8px;
+      margin:10px 0 15px;
+      color:#aeb5c2;
+      font-size:13px;
+    }
+    .form{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+    .form input,.form textarea,.form select{
+      width:100%;
+      padding:12px;
+      border:1px solid #303744;
+      background:#0b0e13;
+      color:white;
+      border-radius:8px;
+      outline:none;
+    }
+    .form textarea{min-height:150px;resize:vertical}
+    .form input:focus,.form textarea:focus,.form select:focus{border-color:#ff3b30}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .primary{
+      background:#ff3b30;
+      color:white;
+      border:0;
+      padding:12px;
+      border-radius:8px;
+      font-weight:900;
+    }
+    .secondary{
+      background:#242a35;
+      color:white;
+      border:0;
+      padding:12px;
+      border-radius:8px;
+      font-weight:800;
+    }
+    .danger{background:#9d231d}
+    .admin-list{
+      display:grid;
+      gap:10px;
+      margin-top:18px;
+    }
+    .admin-item{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+      background:#171c25;
+      padding:12px;
+      border-radius:9px;
+      border:1px solid #282e39;
+    }
+    .admin-item small{display:block;color:#8e96a5;margin-top:3px}
+    .admin-actions{display:flex;gap:7px;flex-wrap:wrap}
+
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform:translateX(-50%) translateY(80px);
+      background:#171c25;
+      border:1px solid #343b49;
+      padding:11px 15px;
+      border-radius:9px;
+      opacity:0;
+      transition:.25s;
+      z-index:300;
+      max-width:90%;
+      text-align:center;
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    @media(max-width:850px){
+      #newsGrid{grid-template-columns:repeat(2,1fr)}
+    }
+    @media(max-width:600px){
+      #newsGrid{grid-template-columns:1fr}
+      .row{grid-template-columns:1fr}
+      .hero-box{min-height:190px}
+      .thumb{height:200px}
+      .nav{padding:12px}
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="nav">
+    <div class="logo">PRIME <span>ESP</span> BD NEWS</div>
+    <button class="admin-open" onclick="openAdmin()">ADMIN</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-box">
+    <div>
+      <h1>FREE FIRE<br><span>ESPORTS NEWS</span></h1>
+      <p>Latest Free Fire esports news, tournaments, teams, players, match results and announcements — all in one place.</p>
+    </div>
+  </div>
+</section>
+
+<section class="breaking">
+  <div class="breaking-box">
+    <span class="breaking-label">BREAKING</span>
+    <span id="breakingText">Welcome to PRIME ESP BD NEWS</span>
+  </div>
+</section>
+
+<main>
+  <div class="toolbar">
+    <input id="searchInput" class="search" type="search" placeholder="Search Free Fire news..." oninput="renderNews()">
+    <button class="cat active" data-cat="All" onclick="setCategory('All')">All</button>
+    <button class="cat" data-cat="News" onclick="setCategory('News')">News</button>
+    <button class="cat" data-cat="Tournament" onclick="setCategory('Tournament')">Tournament</button>
+    <button class="cat" data-cat="Team" onclick="setCategory('Team')">Team</button>
+    <button class="cat" data-cat="Player" onclick="setCategory('Player')">Player</button>
+    <button class="cat" data-cat="Results" onclick="setCategory('Results')">Results</button>
+    <button class="cat" data-cat="Announcement" onclick="setCategory('Announcement')">Announcement</button>
+  </div>
+
+  <div class="section-title">
+    <h2>Latest News</h2>
+    <span class="count" id="newsCount">0 news</span>
+  </div>
+
+  <div id="newsGrid">
+    <div class="empty">Loading news...</div>
+  </div>
+</main>
+
+<footer>
+  © <span id="year"></span> PRIME ESP BD NEWS — Free Fire Esports Only
+</footer>
+
+<!-- Article Modal -->
+<div id="articleModal" class="modal" onclick="closeOnBg(event,'articleModal')">
+  <div class="modal-box">
+    <button class="close" onclick="closeModal('articleModal')">×</button>
+    <div id="articleContent"></div>
+  </div>
+</div>
+
+<!-- Admin Modal -->
+<div id="adminModal" class="modal" onclick="closeOnBg(event,'adminModal')">
+  <div class="modal-box">
+    <button class="close" onclick="closeModal('adminModal')">×</button>
+    <h2>Admin Panel</h2>
+
+    <div id="loginArea">
+      <div class="admin-status">Login with your Firebase admin account.</div>
+      <form class="form" onsubmit="loginAdmin(event)">
+        <input id="adminEmail" type="email" placeholder="Admin email" required>
+        <input id="adminPassword" type="password" placeholder="Password" required>
+        <button class="primary" type="submit">LOGIN</button>
+      </form>
+    </div>
+
+    <div id="panelArea" style="display:none">
+      <div class="admin-status">
+        Logged in as <b id="loggedEmail"></b>
+      </div>
+
+      <form class="form" onsubmit="saveNews(event)">
+        <input id="newsTitle" type="text" placeholder="News title" required>
+
+        <div class="row">
+          <select id="newsCategory" required>
+            <option value="News">News</option>
+            <option value="Tournament">Tournament</option>
+            <option value="Team">Team</option>
+            <option value="Player">Player</option>
+            <option value="Results">Results</option>
+            <option value="Announcement">Announcement</option>
+          </select>
+          <input id="newsImage" type="url" placeholder="Image URL (https://...)" required>
+        </div>
+
+        <input id="newsBreaking" type="text" placeholder="Breaking text (optional)">
+        <textarea id="newsBody" placeholder="Write the full news here..." required></textarea>
+
+        <div class="row">
+          <button class="primary" type="submit" id="saveBtn">PUBLISH NEWS</button>
+          <button class="secondary" type="button" onclick="resetForm()">CLEAR</button>
+        </div>
+      </form>
+
+      <div class="section-title" style="margin-top:25px">
+        <h3>Manage News</h3>
+      </div>
+      <div id="adminList" class="admin-list"></div>
+
+      <button class="secondary" style="margin-top:15px;width:100%" onclick="logoutAdmin()">LOGOUT</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    onAuthStateChanged,
+    signOut
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc,
+    query,
+    orderBy,
+    onSnapshot,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // =========================
+  // YOUR FIREBASE CONFIG
+  // =========================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBSGZQspovrtwV6Ssxe0EUl9morP8RD1Gc",
+    authDomain: "prime-esp-bd-news.firebaseapp.com",
+    projectId: "prime-esp-bd-news",
+    storageBucket: "prime-esp-bd-news.firebasestorage.app",
+    messagingSenderId: "472268427175",
+    appId: "1:472268427175:web:964d11e62572340a31b082",
+    measurementId: "G-GBHL05JWKT"
+  };
+
+  const ADMIN_EMAIL = "adminnewsbd@gmail.com";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let allNews = [];
+  let activeCategory = "All";
+  let editingId = null;
+
+  window.openAdmin = () => {
+    document.getElementById("adminModal").classList.add("show");
+  };
+
+  window.closeModal = (id) => {
+    document.getElementById(id).classList.remove("show");
+  };
+
+  window.closeOnBg = (event,id) => {
+    if(event.target.id === id) closeModal(id);
+  };
+
+  window.setCategory = (cat) => {
+    activeCategory = cat;
+    document.querySelectorAll(".cat").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.cat === cat);
+    });
+    renderNews();
+  };
+
+  function escapeHTML(value=""){
+    return String(value)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function formatDate(ts){
+    if(!ts) return "Just now";
+    try{
+      const date = ts.toDate ? ts.toDate() : new Date(ts);
+      return date.toLocaleString("en-BD",{
+        day:"2-digit",month:"short",year:"numeric",
+        hour:"2-digit",minute:"2-digit"
+      });
+    }catch{
+      return "Just now";
+    }
+  }
+
+  function showToast(message){
+    const t = document.getElementById("toast");
+    t.textContent = message;
+    t.classList.add("show");
+    setTimeout(()=>t.classList.remove("show"),2600);
+  }
+
+  window.renderNews = () => {
+    const grid = document.getElementById("newsGrid");
+    const search = document.getElementById("searchInput").value.trim().toLowerCase();
+
+    const filtered = allNews.filter(item => {
+      const categoryOK = activeCategory === "All" || item.category === activeCategory;
+      const text = `${item.title||""} ${item.body||""} ${item.category||""}`.toLowerCase();
+      return categoryOK && text.includes(search);
+    });
+
+    document.getElementById("newsCount").textContent =
+      `${filtered.length} ${filtered.length === 1 ? "news" : "news"}`;
+
+    if(!filtered.length){
+      grid.innerHTML = `<div class="empty">No news found.</div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(item => `
+      <article class="card">
+        <img class="thumb"
+          src="${escapeHTML(item.image)}"
+          alt=""
+          onerror="this.style.display='none'">
+        <div class="card-body">
+          <div class="tag">${escapeHTML(item.category || "News")}</div>
+          <h3>${escapeHTML(item.title)}</h3>
+          <div class="date">${formatDate(item.createdAt)}</div>
+          <div class="excerpt">${escapeHTML((item.body||"").slice(0,130))}${(item.body||"").length>130?"...":""}</div>
+          <button class="read" onclick="openArticle('${item.id}')">READ MORE</button>
+        </div>
+      </article>
+    `).join("");
+  };
+
+  window.openArticle = (id) => {
+    const item = allNews.find(n => n.id === id);
+    if(!item) return;
+
+    document.getElementById("articleContent").innerHTML = `
+      <div class="tag">${escapeHTML(item.category || "News")}</div>
+      <h1>${escapeHTML(item.title)}</h1>
+      <div class="date">${formatDate(item.createdAt)}</div>
+      <img class="article-img"
+        src="${escapeHTML(item.image)}"
+        alt=""
+        onerror="this.style.display='none'">
+      <div class="article-text">${escapeHTML(item.body)}</div>
+    `;
+
+    document.getElementById("articleModal").classList.add("show");
+  };
+
+  // Firebase auth state
+  onAuthStateChanged(auth, user => {
+    const loginArea = document.getElementById("loginArea");
+    const panelArea = document.getElementById("panelArea");
+
+    if(user && user.email === ADMIN_EMAIL){
+      loginArea.style.display = "none";
+      panelArea.style.display = "block";
+      document.getElementById("loggedEmail").textContent = user.email;
+      renderAdminList();
+    }else{
+      loginArea.style.display = "block";
+      panelArea.style.display = "none";
+
+      if(user){
+        signOut(auth);
+        showToast("This account is not the admin account.");
+      }
+    }
+  });
+
+  window.loginAdmin = async (event) => {
+    event.preventDefault();
+
+    const email = document.getElementById("adminEmail").value.trim();
+    const password = document.getElementById("adminPassword").value;
+
+    if(email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()){
+      showToast("Wrong admin email.");
+      return;
+    }
+
+    try{
+      await signInWithEmailAndPassword(auth,email,password);
+      showToast("Admin login successful.");
+    }catch(error){
+      console.error(error);
+      showToast("Login failed. Check email/password.");
+    }
+  };
+
+  window.logoutAdmin = async () => {
+    await signOut(auth);
+    resetForm();
+    showToast("Logged out.");
+  };
+
+  window.saveNews = async (event) => {
+    event.preventDefault();
+
+    const user = auth.currentUser;
+    if(!user || user.email !== ADMIN_EMAIL){
+      showToast("Admin login required.");
+      return;
+    }
+
+    const data = {
+      title: document.getElementById("newsTitle").value.trim(),
+      category: document.getElementById("newsCategory").value,
+      image: document.getElementById("newsImage").value.trim(),
+      breaking: document.getElementById("newsBreaking").value.trim(),
+      body: document.getElementById("newsBody").value.trim()
+    };
+
+    if(!data.title || !data.image || !data.body){
+      showToast("Please fill all required fields.");
+      return;
+    }
+
+    try{
+      if(editingId){
+        await updateDoc(doc(db,"news",editingId),data);
+        showToast("News updated.");
+      }else{
+        await addDoc(collection(db,"news"),{
+          ...data,
+          createdAt: serverTimestamp()
+        });
+        showToast("News published.");
+      }
+      resetForm();
+    }catch(error){
+      console.error(error);
+      showToast("Could not save news. Check Firestore rules.");
+    }
+  };
+
+  window.editNews = (id) => {
+    const item = allNews.find(n => n.id === id);
+    if(!item) return;
+
+    editingId = id;
+    document.getElementById("newsTitle").value = item.title || "";
+    document.getElementById("newsCategory").value = item.category || "News";
+    document.getElementById("newsImage").value = item.image || "";
+    document.getElementById("newsBreaking").value = item.breaking || "";
+    document.getElementById("newsBody").value = item.body || "";
+    document.getElementById("saveBtn").textContent = "UPDATE NEWS";
+
+    document.querySelector("#adminModal .modal-box").scrollTo({
+      top:0,
+      behavior:"smooth"
+    });
+  };
+
+  window.deleteNews = async (id) => {
+    if(!confirm("Delete this news?")) return;
+
+    const user = auth.currentUser;
+    if(!user || user.email !== ADMIN_EMAIL){
+      showToast("Admin login required.");
+      return;
+    }
+
+    try{
+      await deleteDoc(doc(db,"news",id));
+      showToast("News deleted.");
+    }catch(error){
+      console.error(error);
+      showToast("Delete failed.");
+    }
+  };
+
+  window.resetForm = () => {
+    editingId = null;
+    document.getElementById("newsTitle").value = "";
+    document.getElementById("newsCategory").value = "News";
+    document.getElementById("newsImage").value = "";
+    document.getElementById("newsBreaking").value = "";
+    document.getElementById("newsBody").value = "";
+    document.getElementById("saveBtn").textContent = "PUBLISH NEWS";
+  };
+
+  function renderAdminList(){
+    const box = document.getElementById("adminList");
+
+    if(!allNews.length){
+      box.innerHTML = `<div class="empty">No news published yet.</div>`;
+      return;
+    }
+
+    box.innerHTML = allNews.map(item => `
+      <div class="admin-item">
+        <div>
+          <b>${escapeHTML(item.title)}</b>
+          <small>${escapeHTML(item.category||"News")} • ${formatDate(item.createdAt)}</small>
+        </div>
+        <div class="admin-actions">
+          <button class="secondary" onclick="editNews('${item.id}')">EDIT</button>
+          <button class="secondary danger" onclick="deleteNews('${item.id}')">DELETE</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  // Real-time news listener
+  const newsQuery = query(collection(db,"news"),orderBy("createdAt","desc"));
+
+  onSnapshot(newsQuery, snapshot => {
+    allNews = snapshot.docs.map(d => ({
+      id:d.id,
+      ...d.data()
+    }));
+
+    renderNews();
+    renderAdminList();
+
+    const latest = allNews[0];
+    document.getElementById("breakingText").textContent =
+      latest?.breaking || latest?.title || "Welcome to PRIME ESP BD NEWS";
+  }, error => {
+    console.error(error);
+    document.getElementById("newsGrid").innerHTML =
+      `<div class="empty">Could not load news. Check Firebase/Firestore setup.</div>`;
+  });
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
