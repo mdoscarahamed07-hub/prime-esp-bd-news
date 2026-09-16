@@ -322,9 +322,12 @@
     .brand-wrap{display:flex;align-items:center;gap:10px}
     .brand-mark{width:50px;height:50px;object-fit:contain;border-radius:10px}
     .brand-sub{display:block;color:#8e96a5;font-size:9px;letter-spacing:2px}
-    .hero-inner{width:100%;display:flex;align-items:center;justify-content:space-between;gap:20px}
-    .hero-copy{flex:1}
-    .hero-logo{width:min(260px,55vw);max-height:220px;object-fit:contain}
+    .hero-inner{width:100%;display:block;position:relative;min-height:190px}
+    .hero-copy{position:relative;z-index:2;max-width:760px}
+    .hero-logo{position:absolute;right:18px;bottom:8px;width:125px;height:125px;object-fit:contain;opacity:.16;mix-blend-mode:multiply;filter:contrast(1.08) saturate(1.15);z-index:1;pointer-events:none}
+    .hero-box{overflow:hidden}
+    .hero-box:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 88% 82%,rgba(255,59,48,.10),transparent 35%);}
+    .hero-box{position:relative}
     .mini-credits{max-width:1150px;margin:22px auto 0;padding:0 18px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
     .mini-credit{display:flex;align-items:center;gap:7px;color:#697383;font-size:9px;letter-spacing:1px;opacity:.78}
     .mini-credit img{width:25px;height:25px;object-fit:contain;border-radius:6px;opacity:.9}
@@ -349,7 +352,7 @@
     .member-note{max-width:1150px;margin:5px auto 0;padding:0 18px;text-align:right;color:#4f5867;font-size:8px}
     #memberModal .modal-box{max-width:420px}
     .member-info{color:#9da5b3;font-size:12px;line-height:1.6;margin:8px 0 12px}
-    @media(max-width:650px){.hero-inner{flex-direction:column;text-align:center}.hero-logo{width:200px}.brand-mark{width:43px;height:43px}.logo{font-size:17px}.member-inner{justify-content:center}.member-note{text-align:center}.mini-credits{justify-content:center}}
+    @media(max-width:650px){.hero-inner{text-align:center;min-height:210px}.hero-logo{width:105px;height:105px;right:10px;bottom:8px;opacity:.13}.hero-copy{max-width:100%}.brand-mark{width:43px;height:43px}.logo{font-size:17px}.member-inner{justify-content:center}.member-note{text-align:center}.mini-credits{justify-content:center}}
 
 </style>
 </head>
@@ -389,7 +392,7 @@
     <button class="join-btn" onclick="openMember()">REGISTER / JOIN</button>
   </div>
 </section>
-<div class="member-note">Active = activity seen within the last 10 minutes</div>
+<div class="member-note">Active Now = currently online on the website</div>
 
 <section class="hero">
   <div class="hero-box">
@@ -573,11 +576,13 @@
 
   // =========================
   // MEMBER SYSTEM
-  // Public counter + private phone storage
-  // Active means seen within the last 10 minutes.
+  // Total members = everyone who has registered.
+  // Active Now = members currently on the website (heartbeat based).
   // =========================
   let memberUid = localStorage.getItem("primeMemberUid") || null;
-  const ACTIVE_WINDOW_MS = 10 * 60 * 1000;
+  // A short heartbeat window keeps closed/background tabs from staying online forever.
+  const ACTIVE_WINDOW_MS = 45 * 1000;
+  const HEARTBEAT_MS = 20 * 1000;
 
   window.openMember = () => document.getElementById("memberModal").classList.add("show");
 
@@ -592,7 +597,7 @@
     if(!memberUid) return;
     try{
       const ref = doc(db, "members", memberUid);
-      await updateDoc(ref, {lastActive: serverTimestamp()});
+      await updateDoc(ref, {online: true, lastSeen: serverTimestamp()});
     }catch(e){}
   }
 
@@ -609,7 +614,8 @@
       await setDoc(memberRef, {
         name,
         createdAt: serverTimestamp(),
-        lastActive: serverTimestamp()
+        online: true,
+        lastSeen: serverTimestamp()
       }, {merge:true});
       await setDoc(doc(db, "memberPrivate", uid), {
         phone,
@@ -640,9 +646,10 @@
       let active = 0;
       snap.forEach(d => {
         const data = d.data();
-        const t = data.lastActive?.toDate ? data.lastActive.toDate().getTime() : 0;
-        if(t && now - t <= ACTIVE_WINDOW_MS) active++;
+        const t = data.lastSeen?.toDate ? data.lastSeen.toDate().getTime() : 0;
+        if(data.online === true && t && now - t <= ACTIVE_WINDOW_MS) active++;
       });
+      // This is the all-time registered member total. It never goes down unless a member is deleted.
       document.getElementById("memberCount").textContent = snap.size;
       document.getElementById("activeCount").textContent = active;
     }catch(err){
@@ -671,13 +678,28 @@
     loadMemberStats();
   });
 
+  // Keep registered members marked online only while they are actually using the site.
   setInterval(async () => {
-    await touchMember();
+    if(document.visibilityState === "visible") await touchMember();
     await loadMemberStats();
-  }, 60000);
+  }, HEARTBEAT_MS);
 
-  window.addEventListener("visibilitychange", () => {
-    if(document.visibilityState === "visible") touchMember();
+  document.addEventListener("visibilitychange", async () => {
+    if(document.visibilityState === "visible") {
+      await touchMember();
+      await loadMemberStats();
+    } else if(memberUid) {
+      try {
+        await updateDoc(doc(db, "members", memberUid), {online: false, lastSeen: serverTimestamp()});
+        await loadMemberStats();
+      } catch(e) {}
+    }
+  });
+
+  window.addEventListener("pagehide", () => {
+    if(!memberUid) return;
+    // Best-effort offline flag; heartbeat timeout is the fallback.
+    updateDoc(doc(db, "members", memberUid), {online: false, lastSeen: serverTimestamp()}).catch(()=>{});
   });
 
   let allNews = [];
